@@ -1,104 +1,74 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useCallback } from 'react';
+import { ChatHeader } from './components/ChatHeader';
+import { MessageList } from './components/MessageList';
+import { ChatInput } from './components/ChatInput';
+import { useVSCode, useVSCodeMessageListener } from './hooks/useVSCode';
+import { useMessages } from './hooks/useMessages';
+import type { ExtensionMessage } from './types';
 import './App.css';
 
-interface Message {
-    id: string;
-    role: 'user' | 'assistant';
-    text: string;
-    timestamp: Date;
-}
-
-const vscode = window.vscode || {
-    postMessage: (message: { command: string; text?: string }) => {
-        console.log('vscode.postMessage called:', message);
-    }
-};
-
 function App() {
-    const [messages, setMessages] = useState<Message[]>([]);
-    const [inputValue, setInputValue] = useState('');
-    const [isTyping, setIsTyping] = useState(false);
-    const messagesEndRef = useRef<HTMLDivElement>(null);
-    const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const vscode = useVSCode();
+    const {
+        messages,
+        isTyping,
+        setIsTyping,
+        addMessage,
+        addIDEEvent,
+        updateMessage,
+        removeMessage,
+        clearMessages
+    } = useMessages();
 
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
-
-    useEffect(() => {
-        console.log('Messages updated:', messages.length, messages);
-    }, [messages]);
-
-    useEffect(() => {
-        if (textareaRef.current) {
-            textareaRef.current.style.height = 'auto';
-            textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+    // Handle messages from extension
+    useVSCodeMessageListener(useCallback((message: ExtensionMessage) => {
+        switch (message.command) {
+            case 'ideEvent':
+                if (message.event) {
+                    addIDEEvent(message.event);
+                }
+                break;
+            case 'clearChat':
+                clearMessages();
+                break;
         }
-    }, [inputValue]);
+    }, [addIDEEvent, clearMessages]));
 
-    const handleSend = () => {
-        const message = inputValue.trim();
-        if (!message || isTyping) return;
+    const handleSend = useCallback((text: string) => {
+        if (!text.trim() || isTyping) return;
 
-        const userMessage: Message = {
-            id: `msg-${Date.now()}-${Math.random()}`,
+        // Add user message
+        addMessage({
             role: 'user',
-            text: message,
-            timestamp: new Date()
-        };
+            text: text.trim()
+        });
 
-        setMessages(prev => [...prev, userMessage]);
-        setInputValue('');
+        // Send to extension
+        vscode.postMessage({ command: 'sendMessage', text: text.trim() });
 
-        if (vscode) {
-            vscode.postMessage({ command: 'sendMessage', text: message });
-        }
-
+        // Show typing indicator
         setIsTyping(true);
-        const typingId = `typing-${Date.now()}`;
-        const typingMessage: Message = {
-            id: typingId,
+        const typingId = addMessage({
             role: 'assistant',
-            text: 'Thinking...',
-            timestamp: new Date()
-        };
-        setMessages(prev => [...prev, typingMessage]);
+            text: 'Thinking...'
+        });
 
+        // Simulate response (replace with actual API call)
         setTimeout(() => {
-            const responseText = generateResponse(message);
-            console.log('Generating response:', responseText);
-
+            const responseText = generateResponse(text.trim());
+            removeMessage(typingId);
             setIsTyping(false);
-            setMessages(prev => {
-                console.log('Current messages before update:', prev.length);
-                const filtered = prev.filter(msg => msg.id !== typingId);
-                console.log('Messages after filtering typing:', filtered.length);
-
-                const response: Message = {
-                    id: `msg-${Date.now()}-${Math.random()}`,
-                    role: 'assistant',
-                    text: responseText,
-                    timestamp: new Date()
-                };
-
-                const updated = [...filtered, response];
-                console.log('Messages after adding response:', updated.length, updated);
-                return updated;
+            addMessage({
+                role: 'assistant',
+                text: responseText
             });
         }, 1000);
-    };
+    }, [isTyping, addMessage, removeMessage, setIsTyping, vscode]);
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            handleSend();
-        }
-    };
-
-    const handleClear = () => {
-        setMessages([]);
+    const handleClear = useCallback(() => {
+        clearMessages();
         vscode.postMessage({ command: 'clearChat' });
-    };
+    }, [clearMessages, vscode]);
 
     const generateResponse = (userMessage: string): string => {
         const responses = [
@@ -111,53 +81,11 @@ function App() {
 
     return (
         <div className="chat-container">
-            <div className="chat-header">
-                <h2>Trumio Chat</h2>
-                <button className="clear-button" onClick={handleClear}>
-                    Clear Chat
-                </button>
-            </div>
-            <div className="messages-container">
-                {messages.length === 0 ? (
-                    <div className="empty-state">
-                        <h3>Welcome to Trumio Chat</h3>
-                        <p>Start a conversation by typing a message below.</p>
-                    </div>
-                ) : (
-                    <>
-                        {messages.map(message => (
-                            <div key={message.id} className={`message ${message.role}`}>
-                                <div className="message-bubble">{message.text}</div>
-                                <div className="message-time">
-                                    {message.timestamp.toLocaleTimeString()}
-                                </div>
-                            </div>
-                        ))}
-                    </>
-                )}
-                <div ref={messagesEndRef} />
-            </div>
-            <div className="input-container">
-                <textarea
-                    ref={textareaRef}
-                    className="input-field"
-                    placeholder="Type your message here.."
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    rows={1}
-                />
-                <button
-                    className="send-button"
-                    onClick={handleSend}
-                    disabled={!inputValue.trim() || isTyping}
-                >
-                    Send
-                </button>
-            </div>
+            <ChatHeader onClear={handleClear} />
+            <MessageList messages={messages} />
+            <ChatInput onSend={handleSend} disabled={isTyping} />
         </div>
     );
 }
 
 export default App;
-

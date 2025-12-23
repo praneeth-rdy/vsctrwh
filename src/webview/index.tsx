@@ -3,19 +3,23 @@ import { createRoot } from 'react-dom/client';
 import App from './App';
 
 declare function acquireVsCodeApi(): {
-	postMessage: (message: { command: string; text?: string }) => void;
+	postMessage: (message: { command: string; text?: string; data?: unknown }) => void;
 	getState: () => unknown;
 	setState: (state: unknown) => void;
 };
 
 declare global {
 	interface Window {
-		vscode: ReturnType<typeof acquireVsCodeApi>;
+		vscode: {
+			postMessage: (message: { command: string; text?: string; data?: unknown }) => void;
+		};
 	}
 }
 
-const vscode = acquireVsCodeApi();
-window.vscode = vscode;
+const vscodeApi = acquireVsCodeApi();
+window.vscode = {
+	postMessage: vscodeApi.postMessage
+};
 
 const container = document.getElementById('root');
 if (!container) {

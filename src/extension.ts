@@ -8,7 +8,8 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	const provider = new ChatViewProvider(context.extensionUri);
 	context.subscriptions.push(
-		vscode.window.registerWebviewViewProvider(VIEW_IDS.CHAT_VIEW, provider)
+		vscode.window.registerWebviewViewProvider(VIEW_IDS.CHAT_VIEW, provider),
+		provider
 	);
 
 	registerCommands(context, provider);
