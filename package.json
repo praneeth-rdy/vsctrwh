@@ -1,7 +1,7 @@
 {
   "name": "vsctrwh",
-  "displayName": "vsctrwh",
-  "description": "",
+  "displayName": "Custom Chat Interface",
+  "description": "Custom chat interface extension that disables VS Code's built-in chat and provides a custom chat experience",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.107.0"
@@ -11,15 +11,51 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "vsctrwh.helloWorld",
-        "title": "Hello World"
+        "command": "vsctrwh.openChat",
+        "title": "Open Custom Chat",
+        "icon": "$(comment-discussion)"
+      },
+      {
+        "command": "vsctrwh.closeChat",
+        "title": "Close Custom Chat"
       }
-    ]
+    ],
+    "keybindings": [
+      {
+        "command": "vsctrwh.openChat",
+        "key": "ctrl+shift+c",
+        "mac": "cmd+shift+c"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "vsctrwh.openChat",
+          "when": "true"
+        },
+        {
+          "command": "vsctrwh.closeChat",
+          "when": "true"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Custom Chat",
+      "properties": {
+        "vsctrwh.disableBuiltInChat": {
+          "type": "boolean",
+          "default": true,
+          "description": "Disable VS Code's built-in chat features"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
