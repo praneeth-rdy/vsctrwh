@@ -6,6 +6,8 @@
   "engines": {
     "vscode": "^1.107.0"
   },
+  "publisher": "prdy-trumio",
+  "repository": {},
   "categories": [
     "Other"
   ],
