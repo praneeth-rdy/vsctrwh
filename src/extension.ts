@@ -1,131 +1,83 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import * as path from 'path';
 
-let chatPanel: vscode.WebviewPanel | undefined = undefined;
-
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+	disableBuiltInChat();
 
-	// Disable VS Code's built-in chat features
-	disableBuiltInChat(context);
+	const provider = new CustomChatViewProvider(context.extensionUri);
+	context.subscriptions.push(
+		vscode.window.registerWebviewViewProvider('vsctrwhCustomChat', provider)
+	);
 
-	// Register command to open custom chat
-	const openChatDisposable = vscode.commands.registerCommand('vsctrwh.openChat', () => {
-		createOrShowChatPanel(context);
-	});
-
-	// Register command to close chat
-	const closeChatDisposable = vscode.commands.registerCommand('vsctrwh.closeChat', () => {
-		if (chatPanel) {
-			chatPanel.dispose();
-		}
-	});
-
-	// Override built-in chat commands to show our custom chat instead
-	const overrideChatDisposable = vscode.commands.registerCommand('workbench.action.chat.open', () => {
-		createOrShowChatPanel(context);
-	});
-
-	const overrideInlineChatDisposable = vscode.commands.registerCommand('workbench.action.chat.openInEditor', () => {
-		createOrShowChatPanel(context);
-	});
+	const revealChat = () => {
+		const instance = CustomChatViewProvider.getInstance();
+		instance?.reveal();
+	};
 
 	context.subscriptions.push(
-		openChatDisposable,
-		closeChatDisposable,
-		overrideChatDisposable,
-		overrideInlineChatDisposable
+		vscode.commands.registerCommand('vsctrwh.openChat', revealChat),
+		vscode.commands.registerCommand('workbench.action.chat.open', revealChat),
+		vscode.commands.registerCommand('workbench.action.chat.openInEditor', revealChat)
 	);
-
-	console.log('Custom Chat Extension "vsctrwh" is now active!');
 }
 
-function disableBuiltInChat(context: vscode.ExtensionContext) {
-	// Set configuration to disable built-in AI features
-	const config = vscode.workspace.getConfiguration();
+class CustomChatViewProvider implements vscode.WebviewViewProvider {
+	private static instance: CustomChatViewProvider | undefined;
+	private _view?: vscode.WebviewView;
 
-	// Update workspace settings to disable chat
-	config.update('chat.disableAIFeatures', true, vscode.ConfigurationTarget.Workspace, true)
-		.then(() => {
-			console.log('Built-in chat features disabled');
-		}, (error) => {
-			console.error('Failed to disable built-in chat:', error);
-		});
-
-	// Also try to disable at user level if workspace update fails
-	config.update('chat.disableAIFeatures', true, vscode.ConfigurationTarget.Global, true)
-		.then(() => {
-			// Successfully disabled at user level
-		}, (error: unknown) => {
-			console.error('Failed to disable built-in chat at user level:', error);
-		});
-}
-
-function createOrShowChatPanel(context: vscode.ExtensionContext) {
-	// Always open in the right panel (beside the active editor)
-	const columnToShowIn = vscode.ViewColumn.Beside;
-
-	if (chatPanel) {
-		// If we already have a panel, show it in the right column
-		chatPanel.reveal(columnToShowIn);
-		return;
+	constructor(private readonly _extensionUri: vscode.Uri) {
+		CustomChatViewProvider.instance = this;
 	}
 
-	// Otherwise, create a new panel in the right column
-	chatPanel = vscode.window.createWebviewPanel(
-		'customChat',
-		'Custom Chat',
-		columnToShowIn,
-		{
+	public static getInstance(): CustomChatViewProvider | undefined {
+		return CustomChatViewProvider.instance;
+	}
+
+	public resolveWebviewView(
+		webviewView: vscode.WebviewView,
+		_context: vscode.WebviewViewResolveContext,
+		_token: vscode.CancellationToken
+	) {
+		this._view = webviewView;
+
+		webviewView.webview.options = {
 			enableScripts: true,
-			retainContextWhenHidden: true,
-			localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath, 'src'))]
-		}
-	);
+			localResourceRoots: [this._extensionUri]
+		};
 
-	// Set the webview's initial html content
-	chatPanel.webview.html = getWebviewContent(chatPanel.webview, context);
+		webviewView.webview.html = this.getWebviewContent(webviewView.webview);
+		webviewView.show(true);
 
-	// Handle messages from the webview
-	chatPanel.webview.onDidReceiveMessage(
-		message => {
+		webviewView.webview.onDidReceiveMessage(message => {
 			switch (message.command) {
 				case 'sendMessage':
-					handleChatMessage(message.text);
-					return;
+					this.handleChatMessage(message.text);
+					break;
 				case 'clearChat':
-					clearChat();
-					return;
+					this.clearChat();
+					break;
 			}
-		},
-		undefined,
-		context.subscriptions
-	);
+		});
+	}
 
-	// Handle panel disposal
-	chatPanel.onDidDispose(
-		() => {
-			chatPanel = undefined;
-		},
-		null,
-		context.subscriptions
-	);
-}
+	public reveal() {
+		this._view?.show(true);
+	}
 
-function getWebviewContent(webview: vscode.Webview, context: vscode.ExtensionContext): string {
-	// Get the path to the HTML file
-	const htmlPath = path.join(context.extensionPath, 'src', 'chat.html');
+	private handleChatMessage(text: string) {
+		console.log('Received message:', text);
+	}
 
-	// For now, return inline HTML. In production, you might want to read from a file
-	return `<!DOCTYPE html>
+	private clearChat() {
+		this._view?.webview.postMessage({ command: 'clearChat' });
+	}
+
+	private getWebviewContent(webview: vscode.Webview): string {
+		return `<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Custom Chat</title>
+	<title>Trumio Chat</title>
 	<style>
 		* {
 			margin: 0;
@@ -305,12 +257,12 @@ function getWebviewContent(webview: vscode.Webview, context: vscode.ExtensionCon
 <body>
 	<div class="chat-container">
 		<div class="chat-header">
-			<h2>Custom Chat</h2>
+			<h2>Trumio Chat</h2>
 			<button class="clear-button" id="clearButton">Clear Chat</button>
 		</div>
 		<div class="messages-container" id="messagesContainer">
 			<div class="empty-state">
-				<h3>Welcome to Custom Chat</h3>
+				<h3>Welcome to Trumio Chat</h3>
 				<p>Start a conversation by typing a message below.</p>
 			</div>
 		</div>
@@ -318,7 +270,7 @@ function getWebviewContent(webview: vscode.Webview, context: vscode.ExtensionCon
 			<textarea 
 				id="messageInput" 
 				class="input-field" 
-				placeholder="Type your message here... (Press Enter to send, Shift+Enter for new line)"
+				placeholder="Type your message here.."
 				rows="1"
 			></textarea>
 			<button class="send-button" id="sendButton">Send</button>
@@ -334,13 +286,11 @@ function getWebviewContent(webview: vscode.Webview, context: vscode.ExtensionCon
 
 		let messageHistory = [];
 
-		// Auto-resize textarea
 		messageInput.addEventListener('input', function() {
 			this.style.height = 'auto';
 			this.style.height = Math.min(this.scrollHeight, 120) + 'px';
 		});
 
-		// Handle Enter key (send) vs Shift+Enter (new line)
 		messageInput.addEventListener('keydown', function(e) {
 			if (e.key === 'Enter' && !e.shiftKey) {
 				e.preventDefault();
@@ -350,37 +300,27 @@ function getWebviewContent(webview: vscode.Webview, context: vscode.ExtensionCon
 
 		function sendMessage() {
 			const message = messageInput.value.trim();
-			if (!message) {
-				return;
-			}
+			if (!message) return;
 
-			// Add user message to UI
 			addMessage('user', message);
-			
-			// Clear input
 			messageInput.value = '';
 			messageInput.style.height = 'auto';
 			sendButton.disabled = true;
 
-			// Send message to extension
 			vscode.postMessage({
 				command: 'sendMessage',
 				text: message
 			});
 
-			// Show typing indicator
 			const typingId = addMessage('assistant', 'Thinking...', true);
 			
-			// Simulate response (replace with actual API call)
 			setTimeout(() => {
 				removeMessage(typingId);
-				const response = generateResponse(message);
-				addMessage('assistant', response);
+				addMessage('assistant', generateResponse(message));
 			}, 1000);
 		}
 
 		function addMessage(role, text, isTemporary = false) {
-			// Remove empty state if present
 			const emptyState = messagesContainer.querySelector('.empty-state');
 			if (emptyState) {
 				emptyState.remove();
@@ -402,7 +342,6 @@ function getWebviewContent(webview: vscode.Webview, context: vscode.ExtensionCon
 
 			messageDiv.appendChild(bubble);
 			messageDiv.appendChild(time);
-
 			messagesContainer.appendChild(messageDiv);
 			messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
@@ -421,7 +360,6 @@ function getWebviewContent(webview: vscode.Webview, context: vscode.ExtensionCon
 		}
 
 		function generateResponse(userMessage) {
-			// Placeholder response - replace with actual API integration
 			const responses = [
 				\`I received your message: "\${userMessage}". This is a custom chat interface. You can integrate this with any chat API or service.\`,
 				\`Thanks for your message! This custom chat has replaced VS Code's built-in chat. How can I help you?\`,
@@ -433,7 +371,7 @@ function getWebviewContent(webview: vscode.Webview, context: vscode.ExtensionCon
 		function clearChat() {
 			messagesContainer.innerHTML = \`
 				<div class="empty-state">
-					<h3>Welcome to Custom Chat</h3>
+					<h3>Welcome to Trumio Chat</h3>
 					<p>Start a conversation by typing a message below.</p>
 				</div>
 			\`;
@@ -447,31 +385,29 @@ function getWebviewContent(webview: vscode.Webview, context: vscode.ExtensionCon
 			sendButton.disabled = !this.value.trim();
 		});
 
-		// Focus input on load
 		messageInput.focus();
 	</script>
 </body>
 </html>`;
-}
-
-function handleChatMessage(text: string) {
-	// Handle the chat message here
-	// You can integrate with any chat API or service
-	console.log('Received message:', text);
-
-	// Example: You could call an API here
-	// For now, the webview handles the response simulation
-}
-
-function clearChat() {
-	if (chatPanel) {
-		chatPanel.webview.postMessage({ command: 'clearChat' });
 	}
 }
 
-// This method is called when your extension is deactivated
-export function deactivate() {
-	if (chatPanel) {
-		chatPanel.dispose();
-	}
+function disableBuiltInChat() {
+	const config = vscode.workspace.getConfiguration();
+
+	config.update('chat.disableAIFeatures', true, vscode.ConfigurationTarget.Workspace, true)
+		.then(() => {
+			console.log('Built-in chat features disabled');
+		}, (error) => {
+			console.error('Failed to disable built-in chat:', error);
+		});
+
+	config.update('chat.disableAIFeatures', true, vscode.ConfigurationTarget.Global, true)
+		.then(() => {
+			// Successfully disabled at user level
+		}, (error: unknown) => {
+			console.error('Failed to disable built-in chat at user level:', error);
+		});
 }
+
+export function deactivate() { }

@@ -1,10 +1,10 @@
 {
   "name": "vsctrwh",
-  "displayName": "Custom Chat Interface",
-  "description": "Custom chat interface extension that disables VS Code's built-in chat and provides a custom chat experience",
+  "displayName": "Trumio Chat Interface",
+  "description": "Trumio chat interface extension that disables VS Code's built-in chat and provides a custom chat experience",
   "version": "0.0.1",
   "engines": {
-    "vscode": "^1.107.0"
+    "vscode": "^1.85.0"
   },
   "publisher": "prdy-trumio",
   "repository": {},
@@ -19,12 +19,8 @@
     "commands": [
       {
         "command": "vsctrwh.openChat",
-        "title": "Open Custom Chat",
+        "title": "Open Trumio Chat",
         "icon": "$(comment-discussion)"
-      },
-      {
-        "command": "vsctrwh.closeChat",
-        "title": "Close Custom Chat"
       }
     ],
     "keybindings": [
@@ -39,15 +35,11 @@
         {
           "command": "vsctrwh.openChat",
           "when": "true"
-        },
-        {
-          "command": "vsctrwh.closeChat",
-          "when": "true"
         }
       ]
     },
     "configuration": {
-      "title": "Custom Chat",
+      "title": "Trumio Chat",
       "properties": {
         "vsctrwh.disableBuiltInChat": {
           "type": "boolean",
@@ -55,6 +47,24 @@
           "description": "Disable VS Code's built-in chat features"
         }
       }
+    },
+    "viewsContainers": {
+      "secondarySidebar": [
+        {
+          "id": "vsctrwhChatContainer",
+          "title": "Chat",
+          "icon": "$(comment-discussion)"
+        }
+      ]
+    },
+    "views": {
+      "vsctrwhChatContainer": [
+        {
+          "id": "vsctrwhCustomChat",
+          "name": "Trumio Chat",
+          "type": "webview"
+        }
+      ]
     }
   },
   "scripts": {
@@ -69,7 +79,7 @@
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.107.0",
+    "@types/vscode": "^1.85.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
     "typescript-eslint": "^8.48.1",
