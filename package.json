@@ -21,10 +21,6 @@
         "command": "vsctrwh.openChat",
         "title": "Open Custom Chat",
         "icon": "$(comment-discussion)"
-      },
-      {
-        "command": "vsctrwh.closeChat",
-        "title": "Close Custom Chat"
       }
     ],
     "keybindings": [
@@ -39,10 +35,6 @@
         {
           "command": "vsctrwh.openChat",
           "when": "true"
-        },
-        {
-          "command": "vsctrwh.closeChat",
-          "when": "true"
         }
       ]
     },
@@ -55,6 +47,25 @@
           "description": "Disable VS Code's built-in chat features"
         }
       }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "vsctrwhChat",
+          "title": "Chat",
+          "icon": "$(comment-discussion)"
+        }
+      ]
+    },
+    "views": {
+      "vsctrwhChat": [
+        {
+          "id": "vsctrwhCustomChat",
+          "name": "Custom Chat",
+          "type": "webview",
+          "when": "true"
+        }
+      ]
     }
   },
   "scripts": {
