@@ -44,14 +44,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled = false }
 				rows={1}
 				disabled={disabled}
 			/>
-			<button
-				className="send-button"
-				onClick={handleSend}
-				disabled={!inputValue.trim() || disabled}
-			>
+			<button className="send-button" onClick={handleSend} disabled={!inputValue.trim() || disabled}>
 				Send
 			</button>
 		</div>
 	);
 };
-

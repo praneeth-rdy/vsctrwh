@@ -9,6 +9,7 @@ export interface Message {
 export interface MessageMetadata {
 	filePath?: string;
 	fileName?: string;
+	parentFolder?: string;
 	language?: string;
 	selection?: {
 		startLine: number;
@@ -40,6 +41,7 @@ export interface CodeSelectionEvent {
 	type: 'codeSelection';
 	filePath: string;
 	fileName: string;
+	parentFolder?: string;
 	language: string;
 	selection: {
 		startLine: number;
@@ -63,4 +65,3 @@ export interface ExtensionMessage {
 	event?: IDEEvent;
 	text?: string;
 }
-

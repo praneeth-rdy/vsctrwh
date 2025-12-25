@@ -28,11 +28,10 @@ export const MessageList: React.FC<MessageListProps> = ({ messages }) => {
 
 	return (
 		<div className="messages-container">
-			{messages.map(message => (
+			{messages.map((message) => (
 				<MessageItem key={message.id} message={message} />
 			))}
 			<div ref={messagesEndRef} />
 		</div>
 	);
 };
-

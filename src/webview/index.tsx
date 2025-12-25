@@ -11,7 +11,13 @@ declare function acquireVsCodeApi(): {
 declare global {
 	interface Window {
 		vscode: {
-			postMessage: (message: { command: string; text?: string; data?: unknown }) => void;
+			postMessage: (message: {
+				command: string;
+				text?: string;
+				data?: unknown;
+				filePath?: string;
+				line?: number;
+			}) => void;
 		};
 	}
 }
@@ -34,4 +40,3 @@ if (!container) {
 	);
 	console.log('React app initialized');
 }
-

@@ -1,11 +1,13 @@
 import * as vscode from 'vscode';
 import { getWebviewContent } from '../webview/chatWebview';
-import type { ExtensionMessage, IDEEvent, CodeEditEvent, CodeSelectionEvent } from '../webview/types';
+import type { ExtensionMessage, IDEEvent, CodeSelectionEvent } from '../webview/types';
+import { DEBOUNCE_DELAY_MS } from '../constants';
 
 export class ChatViewProvider implements vscode.WebviewViewProvider {
 	private static instance: ChatViewProvider | undefined;
 	private _view?: vscode.WebviewView;
 	private _disposables: vscode.Disposable[] = [];
+	private _selectionDebounceTimer: NodeJS.Timeout | undefined;
 
 	constructor(private readonly _extensionUri: vscode.Uri) {
 		ChatViewProvider.instance = this;
@@ -24,9 +26,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 
 		webviewView.webview.options = {
 			enableScripts: true,
-			localResourceRoots: [
-				vscode.Uri.joinPath(this._extensionUri, 'dist', 'webview')
-			]
+			localResourceRoots: [vscode.Uri.joinPath(this._extensionUri, 'dist', 'webview')]
 		};
 
 		webviewView.webview.html = getWebviewContent(webviewView.webview, this._extensionUri);
@@ -41,86 +41,89 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 	}
 
 	public dispose(): void {
-		this._disposables.forEach(disposable => disposable.dispose());
+		if (this._selectionDebounceTimer) {
+			clearTimeout(this._selectionDebounceTimer);
+		}
+		this._disposables.forEach((disposable) => disposable.dispose());
 		this._disposables = [];
 	}
 
 	private setupMessageHandlers(webviewView: vscode.WebviewView): void {
-		const messageHandler = webviewView.webview.onDidReceiveMessage((message: { command: string; text?: string }) => {
-			switch (message.command) {
-				case 'sendMessage':
-					if (message.text) {
-						this.handleChatMessage(message.text);
-					}
-					break;
-				case 'clearChat':
-					this.clearChat();
-					break;
+		const messageHandler = webviewView.webview.onDidReceiveMessage(
+			(message: { command: string; text?: string; filePath?: string; line?: number }) => {
+				switch (message.command) {
+					case 'sendMessage':
+						if (message.text) {
+							this.handleChatMessage(message.text);
+						}
+						break;
+					case 'clearChat':
+						this.clearChat();
+						break;
+					case 'openFile':
+						if (message.filePath !== undefined) {
+							this.openFile(message.filePath, message.line);
+						}
+						break;
+				}
 			}
-		});
+		);
 		this._disposables.push(messageHandler);
 	}
 
 	private setupIDEEventListeners(): void {
-		// Listen to text document changes (code edits)
-		const textDocumentChangeListener = vscode.workspace.onDidChangeTextDocument((event: vscode.TextDocumentChangeEvent) => {
-			if (!this._view) return;
+		// Only listen to text editor selection changes (code edits removed)
+		const selectionChangeListener = vscode.window.onDidChangeTextEditorSelection(
+			(event: vscode.TextEditorSelectionChangeEvent) => {
+				if (!this._view) {
+					return;
+				}
 
-			const document = event.document;
-			if (document.uri.scheme === 'file' && event.contentChanges.length > 0) {
-				const editEvent: CodeEditEvent = {
-					type: 'codeEdit',
-					filePath: document.uri.fsPath,
-					fileName: document.fileName.split('/').pop() || document.fileName,
-					language: document.languageId,
-					changes: event.contentChanges.map(change => ({
-						range: {
-							startLine: change.range.start.line,
-							endLine: change.range.end.line,
-							startCharacter: change.range.start.character,
-							endCharacter: change.range.end.character
-						},
-						text: change.text
-					}))
-				};
+				const editor = event.textEditor;
+				const document = editor.document;
+				const selection = event.selections[0];
 
-				this.sendIDEEvent(editEvent);
-			}
-		});
-		this._disposables.push(textDocumentChangeListener);
-
-		// Listen to text editor selection changes
-		const selectionChangeListener = vscode.window.onDidChangeTextEditorSelection((event: vscode.TextEditorSelectionChangeEvent) => {
-			if (!this._view) return;
-
-			const editor = event.textEditor;
-			const document = editor.document;
-			const selection = event.selections[0];
-
-			if (document.uri.scheme === 'file' && selection && !selection.isEmpty) {
-				const selectedText = document.getText(selection);
-				const selectionEvent: CodeSelectionEvent = {
-					type: 'codeSelection',
-					filePath: document.uri.fsPath,
-					fileName: document.fileName.split('/').pop() || document.fileName,
-					language: document.languageId,
-					selection: {
-						startLine: selection.start.line,
-						endLine: selection.end.line,
-						startCharacter: selection.start.character,
-						endCharacter: selection.end.character,
-						text: selectedText
+				if (document.uri.scheme === 'file' && selection && !selection.isEmpty) {
+					// Clear existing debounce timer
+					if (this._selectionDebounceTimer) {
+						clearTimeout(this._selectionDebounceTimer);
 					}
-				};
 
-				this.sendIDEEvent(selectionEvent);
+					// Set new debounce timer
+					this._selectionDebounceTimer = setTimeout(() => {
+						const selectedText = document.getText(selection);
+						const filePathParts = document.fileName.split('/');
+						const fileName = filePathParts.pop() || document.fileName;
+						const parentFolder =
+							filePathParts.length > 0 ? filePathParts[filePathParts.length - 1] : undefined;
+
+						const selectionEvent: CodeSelectionEvent = {
+							type: 'codeSelection',
+							filePath: document.uri.fsPath,
+							fileName: fileName,
+							parentFolder: parentFolder,
+							language: document.languageId,
+							selection: {
+								startLine: selection.start.line,
+								endLine: selection.end.line,
+								startCharacter: selection.start.character,
+								endCharacter: selection.end.character,
+								text: selectedText
+							}
+						};
+
+						this.sendIDEEvent(selectionEvent);
+					}, DEBOUNCE_DELAY_MS);
+				}
 			}
-		});
+		);
 		this._disposables.push(selectionChangeListener);
 	}
 
 	private sendIDEEvent(event: IDEEvent): void {
-		if (!this._view) return;
+		if (!this._view) {
+			return;
+		}
 
 		const message: ExtensionMessage = {
 			command: 'ideEvent',
@@ -137,5 +140,20 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 	private clearChat(): void {
 		this._view?.webview.postMessage({ command: 'clearChat' });
 	}
-}
 
+	private async openFile(filePath: string, line?: number): Promise<void> {
+		try {
+			const uri = vscode.Uri.file(filePath);
+			const document = await vscode.workspace.openTextDocument(uri);
+			const editor = await vscode.window.showTextDocument(document);
+
+			if (line !== undefined) {
+				const position = new vscode.Position(line, 0);
+				editor.selection = new vscode.Selection(position, position);
+				editor.revealRange(new vscode.Range(position, position), vscode.TextEditorRevealType.InCenter);
+			}
+		} catch (error) {
+			console.error('Failed to open file:', error);
+		}
+	}
+}

@@ -10,6 +10,7 @@
 		opacity: 0;
 		transform: translateY(10px);
 	}
+
 	to {
 		opacity: 1;
 		transform: translateY(0);
@@ -34,6 +35,8 @@
 	border-radius: 8px;
 	word-wrap: break-word;
 	line-height: 1.5;
+	min-width: 0;
+	overflow: hidden;
 }
 
 .message.user .message-bubble {
@@ -68,9 +71,100 @@
 	display: inline-block;
 }
 
+.file-header {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 12px;
+	padding-bottom: 8px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+	flex-wrap: wrap;
+	min-width: 0;
+	width: 100%;
+}
+
+.file-link {
+	background: none;
+	border: none;
+	color: inherit;
+	cursor: pointer;
+	text-decoration: underline;
+	font-size: 13px;
+	font-weight: 500;
+	font-family: inherit;
+	padding: 0;
+	margin: 0;
+	opacity: 0.9;
+	transition: opacity 0.2s;
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	text-align: left;
+}
+
+.file-link:hover {
+	opacity: 1;
+	text-decoration: underline;
+}
+
+.file-language {
+	font-size: 11px;
+	opacity: 0.7;
+	padding: 2px 6px;
+	background-color: rgba(255, 255, 255, 0.1);
+	border-radius: 3px;
+	flex-shrink: 0;
+	white-space: nowrap;
+}
+
+.code-snippet {
+	background-color: var(--vscode-textCodeBlock-background);
+	border: 1px solid var(--vscode-input-border);
+	border-radius: 4px;
+	padding: 12px;
+	margin: 8px 0;
+	max-height: 200px;
+	overflow-x: auto;
+	overflow-y: auto;
+	font-size: 12px;
+	line-height: 1.5;
+	font-family: var(--vscode-editor-font-family, 'Consolas', 'Monaco', 'Courier New', monospace);
+	user-select: text;
+	-webkit-user-select: text;
+	-moz-user-select: text;
+	-ms-user-select: text;
+	position: relative;
+}
+
+.code-snippet code {
+	color: var(--vscode-textPreformat-foreground);
+	white-space: pre;
+	word-wrap: normal;
+	word-break: normal;
+	background: transparent;
+	display: block;
+}
+
+.code-snippet code::selection {
+	background-color: var(--vscode-textBlockQuote-background, rgba(255, 255, 255, 0.1));
+	color: inherit;
+}
+
+.code-snippet code::-moz-selection {
+	background-color: var(--vscode-textBlockQuote-background, rgba(255, 255, 255, 0.1));
+	color: inherit;
+}
+
+.message-text {
+	margin-top: 8px;
+	font-size: 12px;
+	opacity: 0.8;
+}
+
 .message-time {
 	font-size: 11px;
 	color: var(--vscode-descriptionForeground);
 	padding: 0 4px;
 }
-

@@ -1,106 +1,122 @@
 {
-  "name": "vsctrwh",
-  "displayName": "Trumio Chat Interface",
-  "description": "Trumio chat interface extension that disables VS Code's built-in chat and provides a custom chat experience",
-  "version": "0.0.1",
-  "engines": {
-    "vscode": "^1.85.0"
-  },
-  "publisher": "prdy-trumio",
-  "repository": {},
-  "categories": [
-    "Other"
-  ],
-  "activationEvents": [
-    "onStartupFinished"
-  ],
-  "main": "./dist/extension.js",
-  "contributes": {
-    "commands": [
-      {
-        "command": "vsctrwh.openChat",
-        "title": "Open Trumio Chat",
-        "icon": "$(comment-discussion)"
-      }
-    ],
-    "keybindings": [
-      {
-        "command": "vsctrwh.openChat",
-        "key": "ctrl+shift+c",
-        "mac": "cmd+shift+c"
-      }
-    ],
-    "menus": {
-      "commandPalette": [
-        {
-          "command": "vsctrwh.openChat",
-          "when": "true"
-        }
-      ]
-    },
-    "configuration": {
-      "title": "Trumio Chat",
-      "properties": {
-        "vsctrwh.disableBuiltInChat": {
-          "type": "boolean",
-          "default": true,
-          "description": "Disable VS Code's built-in chat features"
-        }
-      }
-    },
-    "viewsContainers": {
-      "secondarySidebar": [
-        {
-          "id": "vsctrwhChatContainer",
-          "title": "Chat",
-          "icon": "$(comment-discussion)"
-        }
-      ]
-    },
-    "views": {
-      "vsctrwhChatContainer": [
-        {
-          "id": "vsctrwhCustomChat",
-          "name": "Trumio Chat",
-          "type": "webview"
-        }
-      ]
-    }
-  },
-  "scripts": {
-    "vscode:prepublish": "npm run package",
-    "compile": "webpack --mode development",
-    "watch": "webpack --mode development --watch",
-    "build": "webpack --mode production",
-    "package": "webpack --mode production --devtool hidden-source-map",
-    "vsce:package": "npm run build && npx @vscode/vsce package",
-    "clean": "rm -rf dist out",
-    "lint": "eslint src",
-    "lint:fix": "eslint src --fix",
-    "compile-tests": "tsc -p . --outDir out",
-    "watch-tests": "tsc -p . -w --outDir out",
-    "pretest": "npm run compile-tests && npm run compile && npm run lint",
-    "test": "vscode-test",
-    "dev": "npm run watch"
-  },
-  "devDependencies": {
-    "@types/mocha": "^10.0.10",
-    "@types/node": "22.x",
-    "@types/react": "^19.2.7",
-    "@types/react-dom": "^19.2.3",
-    "@types/vscode": "^1.85.0",
-    "@vscode/test-cli": "^0.0.12",
-    "@vscode/test-electron": "^2.5.2",
-    "css-loader": "^7.1.2",
-    "eslint": "^9.39.1",
-    "html-webpack-plugin": "^5.6.5",
-    "react": "^19.2.3",
-    "react-dom": "^19.2.3",
-    "style-loader": "^4.0.0",
-    "ts-loader": "^9.5.4",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.48.1",
-    "webpack": "^5.103.0",
-    "webpack-cli": "^6.0.1"
-  }
+	"name": "vsctrwh",
+	"displayName": "Trumio Chat Interface",
+	"description": "Trumio chat interface extension that disables VS Code's built-in chat and provides a custom chat experience",
+	"version": "0.0.1",
+	"engines": {
+		"vscode": "^1.85.0"
+	},
+	"publisher": "prdy-trumio",
+	"repository": {},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"onStartupFinished"
+	],
+	"main": "./dist/extension.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "vsctrwh.openChat",
+				"title": "Open Trumio Chat",
+				"icon": "$(comment-discussion)"
+			}
+		],
+		"keybindings": [
+			{
+				"command": "vsctrwh.openChat",
+				"key": "ctrl+shift+c",
+				"mac": "cmd+shift+c"
+			}
+		],
+		"menus": {
+			"commandPalette": [
+				{
+					"command": "vsctrwh.openChat",
+					"when": "true"
+				}
+			]
+		},
+		"configuration": {
+			"title": "Trumio Chat",
+			"properties": {
+				"vsctrwh.disableBuiltInChat": {
+					"type": "boolean",
+					"default": true,
+					"description": "Disable VS Code's built-in chat features"
+				}
+			}
+		},
+		"viewsContainers": {
+			"secondarySidebar": [
+				{
+					"id": "vsctrwhChatContainer",
+					"title": "Chat",
+					"icon": "$(comment-discussion)"
+				}
+			]
+		},
+		"views": {
+			"vsctrwhChatContainer": [
+				{
+					"id": "vsctrwhCustomChat",
+					"name": "Trumio Chat",
+					"type": "webview"
+				}
+			]
+		}
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run package",
+		"compile": "webpack --mode development",
+		"watch": "webpack --mode development --watch",
+		"build": "webpack --mode production",
+		"package": "webpack --mode production --devtool hidden-source-map",
+		"vsce:package": "npm run build && npx @vscode/vsce package",
+		"clean": "rm -rf dist out",
+		"lint": "eslint src",
+		"lint:fix": "eslint src --fix",
+		"format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css}\"",
+		"format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css}\"",
+		"prepare": "husky",
+		"compile-tests": "tsc -p . --outDir out",
+		"watch-tests": "tsc -p . -w --outDir out",
+		"pretest": "npm run compile-tests && npm run compile && npm run lint",
+		"test": "vscode-test",
+		"dev": "npm run watch"
+	},
+	"lint-staged": {
+		"*.{ts,tsx,js,jsx}": [
+			"eslint --fix",
+			"prettier --write"
+		],
+		"*.{json,css}": [
+			"prettier --write"
+		]
+	},
+	"devDependencies": {
+		"@types/mocha": "^10.0.10",
+		"@types/node": "22.x",
+		"@types/react": "^19.2.7",
+		"@types/react-dom": "^19.2.3",
+		"@types/vscode": "^1.85.0",
+		"@vscode/test-cli": "^0.0.12",
+		"@vscode/test-electron": "^2.5.2",
+		"css-loader": "^7.1.2",
+		"dotenv-webpack": "^8.1.1",
+		"eslint": "^9.39.1",
+		"html-webpack-plugin": "^5.6.5",
+		"husky": "^9.1.7",
+		"lint-staged": "^16.2.7",
+		"prettier": "^3.7.4",
+		"react": "^19.2.3",
+		"react-dom": "^19.2.3",
+		"style-loader": "^4.0.0",
+		"ts-loader": "^9.5.4",
+		"typescript": "^5.9.3",
+		"typescript-eslint": "^8.48.1",
+		"webpack": "^5.103.0",
+		"webpack-cli": "^6.0.1"
+	}
 }

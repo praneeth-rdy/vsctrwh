@@ -4,6 +4,8 @@
 
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const webpack = require('webpack');
+const Dotenv = require('dotenv-webpack');
 
 //@ts-check
 /** @typedef {import('webpack').Configuration} WebpackConfig **/
@@ -39,8 +41,8 @@ const extensionConfig = {
 	},
 	devtool: 'source-map',
 	infrastructureLogging: {
-		level: "log",
-	},
+		level: 'log'
+	}
 };
 
 /** @type WebpackConfig */
@@ -80,12 +82,21 @@ const webviewConfig = {
 		new HtmlWebpackPlugin({
 			template: './src/webview/index.html',
 			filename: 'index.html'
+		}),
+		new Dotenv({
+			path: './.env',
+			safe: false,
+			systemvars: true,
+			defaults: false
+		}),
+		new webpack.DefinePlugin({
+			'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production')
 		})
 	],
 	devtool: 'source-map',
 	infrastructureLogging: {
-		level: "log",
-	},
+		level: 'log'
+	}
 };
 
 module.exports = [extensionConfig, webviewConfig];

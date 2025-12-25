@@ -15,4 +15,3 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ onClear }) => {
 		</div>
 	);
 };
-

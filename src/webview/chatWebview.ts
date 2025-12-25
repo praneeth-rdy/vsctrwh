@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
 
 export function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri): string {
-    const scriptUri = webview.asWebviewUri(
-        vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'webview.js')
-    );
-    const nonce = getNonce();
+	const scriptUri = webview.asWebviewUri(
+		vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'webview.js')
+	);
+	const nonce = getNonce();
 
-    return `<!DOCTYPE html>
+	return `<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
@@ -22,10 +22,10 @@ export function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.
 }
 
 function getNonce(): string {
-    let text = '';
-    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    for (let i = 0; i < 32; i++) {
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-    }
-    return text;
+	let text = '';
+	const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	for (let i = 0; i < 32; i++) {
+		text += possible.charAt(Math.floor(Math.random() * possible.length));
+	}
+	return text;
 }

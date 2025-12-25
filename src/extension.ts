@@ -15,10 +15,7 @@ export function activate(context: vscode.ExtensionContext): void {
 	registerCommands(context, provider);
 }
 
-function registerCommands(
-	context: vscode.ExtensionContext,
-	provider: ChatViewProvider
-): void {
+function registerCommands(context: vscode.ExtensionContext, provider: ChatViewProvider): void {
 	const revealChat = () => provider.reveal();
 
 	context.subscriptions.push(
@@ -28,4 +25,4 @@ function registerCommands(
 	);
 }
 
-export function deactivate(): void { }
+export function deactivate(): void {}
