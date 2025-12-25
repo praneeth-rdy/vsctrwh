@@ -19,9 +19,7 @@ export const MessageList: React.FC<MessageListProps> = ({ messages }) => {
 			<div className="empty-state">
 				<h3>Welcome to Mio Buddy</h3>
 				<p>Start a conversation by typing a message below.</p>
-				<p className="empty-state-hint">
-					IDE events (code edits and selections) will appear here automatically.
-				</p>
+				<p className="empty-state-hint">Select your code snippet to view insights here.</p>
 			</div>
 		);
 	}
