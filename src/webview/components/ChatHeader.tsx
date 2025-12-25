@@ -8,7 +8,7 @@ interface ChatHeaderProps {
 export const ChatHeader: React.FC<ChatHeaderProps> = ({ onClear }) => {
 	return (
 		<div className="chat-header">
-			<h2>Trumio Chat</h2>
+			<h2>Mio Buddy</h2>
 			<button className="clear-button" onClick={onClear}>
 				Clear Chat
 			</button>

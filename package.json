@@ -1,7 +1,7 @@
 {
 	"name": "vsctrwh",
-	"displayName": "Trumio Chat Interface",
-	"description": "Trumio chat interface extension that disables VS Code's built-in chat and provides a custom chat experience",
+	"displayName": "Mio Buddy",
+	"description": "Mio Buddy chat interface extension that disables VS Code's built-in chat and provides a custom chat experience",
 	"version": "0.0.1",
 	"engines": {
 		"vscode": "^1.85.0"
@@ -19,7 +19,7 @@
 		"commands": [
 			{
 				"command": "vsctrwh.openChat",
-				"title": "Open Trumio Chat",
+				"title": "Open Mio Buddy",
 				"icon": "$(comment-discussion)"
 			}
 		],
@@ -39,7 +39,7 @@
 			]
 		},
 		"configuration": {
-			"title": "Trumio Chat",
+			"title": "Mio Buddy",
 			"properties": {
 				"vsctrwh.disableBuiltInChat": {
 					"type": "boolean",
@@ -61,7 +61,7 @@
 			"vsctrwhChatContainer": [
 				{
 					"id": "vsctrwhCustomChat",
-					"name": "Trumio Chat",
+					"name": "Mio Buddy",
 					"type": "webview"
 				}
 			]
@@ -118,5 +118,9 @@
 		"typescript-eslint": "^8.48.1",
 		"webpack": "^5.103.0",
 		"webpack-cli": "^6.0.1"
+	},
+	"dependencies": {
+		"axios": "^1.13.2",
+		"zustand": "^5.0.9"
 	}
 }

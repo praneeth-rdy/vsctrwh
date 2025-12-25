@@ -17,7 +17,7 @@ export const MessageList: React.FC<MessageListProps> = ({ messages }) => {
 	if (messages.length === 0) {
 		return (
 			<div className="empty-state">
-				<h3>Welcome to Trumio Chat</h3>
+				<h3>Welcome to Mio Buddy</h3>
 				<p>Start a conversation by typing a message below.</p>
 				<p className="empty-state-hint">
 					IDE events (code edits and selections) will appear here automatically.
