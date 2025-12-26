@@ -1,11 +1,3 @@
-export interface Message {
-	id: string;
-	role: 'user' | 'assistant' | 'system';
-	text: string;
-	timestamp: Date;
-	metadata?: MessageMetadata;
-}
-
 export interface MessageMetadata {
 	filePath?: string;
 	fileName?: string;
@@ -54,14 +46,42 @@ export interface CodeSelectionEvent {
 
 export type IDEEvent = CodeEditEvent | CodeSelectionEvent;
 
+export interface ApiRequest {
+	method: 'GET' | 'POST' | 'DELETE';
+	url: string;
+	headers?: Record<string, string>;
+	body?: string;
+	formData?: Array<{ name: string; value: string }>;
+}
+
 export interface WebviewMessage {
 	command: string;
 	text?: string;
 	data?: unknown;
+	filePath?: string;
+	line?: number;
+	apiRequest?: ApiRequest;
+	requestId?: string;
+	stream?: boolean;
 }
 
 export interface ExtensionMessage {
 	command: string;
 	event?: IDEEvent;
 	text?: string;
+	requestId?: string;
+	success?: boolean;
+	data?: {
+		status: number;
+		body: string;
+		headers: Record<string, string | string[]>;
+	};
+	error?: string;
+	chunk?: {
+		status: number;
+		headers: Record<string, string | string[]>;
+		streamChunk?: string;
+		streamComplete?: boolean;
+		streamError?: string;
+	};
 }

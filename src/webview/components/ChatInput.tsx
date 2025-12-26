@@ -2,18 +2,18 @@ import React, { useState, useRef, useEffect } from 'react';
 import './ChatInput.css';
 
 interface ChatInputProps {
+	inputRef: React.RefObject<HTMLInputElement | null>;
 	onSend: (message: string) => void;
 	disabled?: boolean;
 }
 
-export const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled = false }) => {
+export const ChatInput: React.FC<ChatInputProps> = ({ inputRef, onSend, disabled = false }) => {
 	const [inputValue, setInputValue] = useState('');
-	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
 	useEffect(() => {
-		if (textareaRef.current) {
-			textareaRef.current.style.height = 'auto';
-			textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+		if (inputRef.current) {
+			inputRef.current.style.height = 'auto';
+			inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, 120)}px`;
 		}
 	}, [inputValue]);
 
@@ -25,23 +25,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled = false }
 		setInputValue('');
 	};
 
-	const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-		if (e.key === 'Enter' && !e.shiftKey) {
-			e.preventDefault();
-			handleSend();
-		}
-	};
-
 	return (
 		<div className="input-container">
-			<textarea
-				ref={textareaRef}
+			<input
+				ref={inputRef}
 				className="input-field"
 				placeholder="Type your message here.."
 				value={inputValue}
 				onChange={(e) => setInputValue(e.target.value)}
-				onKeyDown={handleKeyDown}
-				rows={1}
 				disabled={disabled}
 			/>
 			<button className="send-button" onClick={handleSend} disabled={!inputValue.trim() || disabled}>

@@ -1,11 +1,10 @@
 .messages-container {
 	flex: 1;
 	overflow-y: auto;
-	padding: 16px;
+	padding: 16px 0;
 	display: flex;
 	flex-direction: column;
 	gap: 16px;
-	min-height: 0;
 }
 
 .empty-state {

@@ -1,16 +1,15 @@
 import React from 'react';
-import type { Message } from '../types';
+import type { CopilotChatMessage } from '../constraints/types/copilot-types';
 import './MessageItem.css';
+import { formatEpochToHumanReadable } from '../utils/date-utils';
+import Markdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface MessageItemProps {
-	message: Message;
+	message: CopilotChatMessage;
 }
 
 export const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
-	const formatTime = (date: Date): string => {
-		return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-	};
-
 	const handleFileClick = (e: React.MouseEvent<HTMLButtonElement>) => {
 		e.preventDefault();
 		if (message.metadata?.filePath) {
@@ -60,13 +59,13 @@ export const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
 						)}
 
 						{/* Message text */}
-						<div className="message-text">{message.text}</div>
+						<div className="message-text">{message.content}</div>
 					</>
 				) : (
-					message.text
+					<Markdown remarkPlugins={[remarkGfm]}>{message.content}</Markdown>
 				)}
 			</div>
-			<div className="message-time">{formatTime(message.timestamp)}</div>
+			<div className="message-time">{formatEpochToHumanReadable(message.createdAt)}</div>
 		</div>
 	);
 };

@@ -1,19 +1,15 @@
 import { useState, useCallback } from 'react';
-import type { Message, CodeSelectionEvent } from '../types';
+import type { CodeSelectionEvent } from '../types';
 import { formatIDEEvent } from './useVSCode';
+import { CopilotChatMessage } from '../constraints/types/copilot-types';
+import { CopilotChatUserRole } from '../constraints/enums/copilot-enums';
 
 export function useMessages() {
-	const [messages, setMessages] = useState<Message[]>([]);
+	const [messages, setMessages] = useState<CopilotChatMessage[]>([]);
 	const [isTyping, setIsTyping] = useState(false);
 
-	const addMessage = useCallback((message: Omit<Message, 'id' | 'timestamp'>) => {
-		const newMessage: Message = {
-			...message,
-			id: `msg-${Date.now()}-${Math.random()}`,
-			timestamp: new Date()
-		};
-		setMessages((prev) => [...prev, newMessage]);
-		return newMessage.id;
+	const addMessage = useCallback((message: Omit<CopilotChatMessage, 'id' | 'timestamp'>) => {
+		setMessages((prev) => [...prev, message]);
 	}, []);
 
 	const addIDEEvent = useCallback(
@@ -42,21 +38,14 @@ export function useMessages() {
 			};
 
 			addMessage({
-				role: 'system',
-				text: formattedText,
+				role: CopilotChatUserRole.User,
+				content: formattedText,
+				createdAt: Date.now(),
 				metadata
 			});
 		},
 		[addMessage]
 	);
-
-	const updateMessage = useCallback((id: string, updates: Partial<Message>) => {
-		setMessages((prev) => prev.map((msg) => (msg.id === id ? { ...msg, ...updates } : msg)));
-	}, []);
-
-	const removeMessage = useCallback((id: string) => {
-		setMessages((prev) => prev.filter((msg) => msg.id !== id));
-	}, []);
 
 	const clearMessages = useCallback(() => {
 		setMessages([]);
@@ -68,8 +57,7 @@ export function useMessages() {
 		setIsTyping,
 		addMessage,
 		addIDEEvent,
-		updateMessage,
-		removeMessage,
-		clearMessages
+		clearMessages,
+		setMessages
 	};
 }

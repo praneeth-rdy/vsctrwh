@@ -1,3 +1,4 @@
+import { MessageMetadata } from '../../types';
 import { createJsonStreamProcessor } from '../../utils/stream-utils';
 import { CopilotChatStreamEvent, CopilotChatUserRole } from '../enums/copilot-enums';
 
@@ -63,6 +64,7 @@ export type CopilotChatMessage = {
 	content: string;
 	createdAt: number;
 	reasoningSteps?: CopilotChatReasoningStep[];
+	metadata?: MessageMetadata;
 };
 
 export type CopilotChatStreamChunk = {

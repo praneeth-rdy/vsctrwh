@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { getWebviewContent } from '../webview/chatWebview';
 import type { ExtensionMessage, IDEEvent, CodeSelectionEvent } from '../webview/types';
 import { DEBOUNCE_DELAY_MS } from '../constants';
+import { makeApiRequest, makeStreamingApiRequest, type ApiRequest } from '../services/api-service';
 
 export class ChatViewProvider implements vscode.WebviewViewProvider {
 	private static instance: ChatViewProvider | undefined;
@@ -50,7 +51,15 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 
 	private setupMessageHandlers(webviewView: vscode.WebviewView): void {
 		const messageHandler = webviewView.webview.onDidReceiveMessage(
-			(message: { command: string; text?: string; filePath?: string; line?: number }) => {
+			async (message: {
+				command: string;
+				text?: string;
+				filePath?: string;
+				line?: number;
+				apiRequest?: ApiRequest;
+				requestId?: string;
+				stream?: boolean;
+			}) => {
 				switch (message.command) {
 					case 'sendMessage':
 						if (message.text) {
@@ -65,10 +74,78 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 							this.openFile(message.filePath, message.line);
 						}
 						break;
+					case 'apiRequest':
+						if (message.apiRequest && message.requestId) {
+							if (message.stream) {
+								// Handle streaming request
+								this.handleStreamingApiRequest(message.apiRequest, message.requestId);
+							} else {
+								// Handle regular request
+								this.handleApiRequest(message.apiRequest, message.requestId);
+							}
+						}
+						break;
 				}
 			}
 		);
 		this._disposables.push(messageHandler);
+	}
+
+	private async handleApiRequest(apiRequest: ApiRequest, requestId: string): Promise<void> {
+		if (!this._view) {
+			return;
+		}
+
+		try {
+			const response = await makeApiRequest(apiRequest);
+			this._view.webview.postMessage({
+				command: 'apiResponse',
+				requestId,
+				success: true,
+				data: response
+			});
+		} catch (error) {
+			this._view.webview.postMessage({
+				command: 'apiResponse',
+				requestId,
+				success: false,
+				error: error instanceof Error ? error.message : 'Unknown error'
+			});
+		}
+	}
+
+	private async handleStreamingApiRequest(apiRequest: ApiRequest, requestId: string): Promise<void> {
+		if (!this._view) {
+			return;
+		}
+
+		try {
+			await makeStreamingApiRequest(apiRequest, (chunk) => {
+				if (!this._view) {
+					return;
+				}
+
+				this._view.webview.postMessage({
+					command: 'apiStreamChunk',
+					requestId,
+					chunk
+				});
+			});
+		} catch (error) {
+			if (!this._view) {
+				return;
+			}
+
+			this._view.webview.postMessage({
+				command: 'apiStreamChunk',
+				requestId,
+				chunk: {
+					status: 500,
+					headers: {},
+					streamError: error instanceof Error ? error.message : 'Unknown error'
+				}
+			});
+		}
 	}
 
 	private setupIDEEventListeners(): void {

@@ -1,6 +1,6 @@
 import { routes } from '../utils/api';
 import { handleError } from '../utils/error-utils';
-import axios from 'axios';
+import { apiClient } from './api-client';
 import {
 	parseAgentSessions,
 	parseAgentSessionDetails
@@ -16,7 +16,7 @@ export const getAgentSessionsService = async () => {
 	const agentId = TALENT_COPILOT_AGENT_ID;
 	const config = { withCredentials: true };
 	try {
-		const response = await axios.get(routes.agents.getAgentSessions(agentId), config);
+		const response = await apiClient.get(routes.agents.getAgentSessions(agentId), config);
 		return parseAgentSessions(response.data);
 		// return parseAgentSessions(agentSessions);
 	} catch (error) {
@@ -29,7 +29,7 @@ export const getAgentSessionDetailsService = async (sessionId: string) => {
 
 	const config = { withCredentials: true };
 	try {
-		const response = await axios.get(
+		const response = await apiClient.get(
 			routes.agents.getAgentSessionDetails(sessionId, agentId),
 			config
 		);
@@ -55,12 +55,11 @@ export const sendMessageService = async (payload: {
 
 	const config: RequestInit = {
 		method: 'POST',
-		credentials: 'include',
 		body: formData
 	};
 
 	try {
-		const response = await fetch(routes.agents.runAgent(agentId), config);
+		const response = await apiClient.fetch(routes.agents.runAgent(agentId), config);
 
 		if (!response.ok) {
 			throw new Error('Failed to send message');
@@ -75,7 +74,10 @@ export const deleteAgentSessionService = async (sessionId: string) => {
 	const agentId = TALENT_COPILOT_AGENT_ID;
 	const config = { withCredentials: true };
 	try {
-		const response = await axios.delete(routes.agents.deleteAgentSession(sessionId, agentId), config);
+		const response = await apiClient.delete(
+			routes.agents.deleteAgentSession(sessionId, agentId),
+			config
+		);
 		return response.data;
 	} catch (error) {
 		handleError(error as Error, 'An unexpected error occurred while deleting agent session');
@@ -85,7 +87,7 @@ export const deleteAgentSessionService = async (sessionId: string) => {
 export const createAgentSessionService = async () => {
 	const config = { withCredentials: true };
 	try {
-		const response = await axios.post(routes.agents.createSessionID(), config);
+		const response = await apiClient.post(routes.agents.createSessionID(), undefined, config);
 		return response.data.session_id;
 	} catch (error) {
 		handleError(error as Error, 'An unexpected error occurred while creating agent session');

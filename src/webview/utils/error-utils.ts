@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { ServerResponseStatus } from '../constraints/enums/core-enums';
 
 /**
@@ -15,20 +14,19 @@ export const handleError = (
 	}
 ) => {
 	const { redirectToLogin = true } = options || {};
-	if (axios.isAxiosError(error) && error.response?.data) {
-		const errorResponse = error.response.data as {
-			status: string;
-			errorData: {
-				errorCode: number;
-				message: string;
-			};
-		};
-		// if (errorResponse.errorData.errorCode === 401 && redirectToLogin) {
-		//   // clearStoresAndStorage();
-		// }
-		if (errorResponse.status === ServerResponseStatus.FAIL && errorResponse.errorData?.message) {
-			throw new Error(errorResponse.errorData.message);
+
+	// Try to parse error message as JSON (for API errors)
+	try {
+		const errorData = JSON.parse(error.message);
+		if (errorData.status === ServerResponseStatus.FAIL && errorData.errorData?.message) {
+			// if (errorData.errorData.errorCode === 401 && redirectToLogin) {
+			//   // clearStoresAndStorage();
+			// }
+			throw new Error(errorData.errorData.message);
 		}
+	} catch {
+		// Not JSON, use the error message as-is
 	}
+
 	throw new Error(error.message || defaultErrorMessage);
 };

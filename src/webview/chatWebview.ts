@@ -12,7 +12,7 @@ export function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Mio Buddy</title>
-	<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}' ${webview.cspSource};">
+	<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}' ${webview.cspSource}; connect-src https://tru-dev-api.trumio.ai;">
 </head>
 <body>
 	<div id="root"></div>

@@ -17,8 +17,8 @@ export const routes = {
 		getAgentSessionDetails: (sessionId: string, agentId: string = DEFAULT_COPILOT_AGENT_ID) =>
 			`${serviceUrls.agentService.v1}/playground/agents/${agentId}/sessions/${sessionId}`,
 		runAgent: (agentId: string = DEFAULT_COPILOT_AGENT_ID) =>
-			`${serviceUrls.agentService.v1}/playground/agents/${agentId}/runs`,
+			`${serviceUrls.agentService.v1}/system/agents/${agentId}/runs`,
 		deleteAgentSession: (sessionId: string, agentId: string = DEFAULT_COPILOT_AGENT_ID) =>
-			`${serviceUrls.agentService.v1}/playground/agents/${agentId}/sessions/${sessionId}`
+			`${serviceUrls.agentService.v1}/system/agents/${agentId}/sessions/${sessionId}`
 	}
 };

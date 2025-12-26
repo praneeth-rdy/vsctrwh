@@ -1,16 +1,10 @@
 import { useEffect, useRef } from 'react';
-import type { ExtensionMessage, IDEEvent } from '../types';
+import type { ExtensionMessage, IDEEvent, WebviewMessage } from '../types';
 
 declare global {
 	interface Window {
 		vscode: {
-			postMessage: (message: {
-				command: string;
-				text?: string;
-				data?: unknown;
-				filePath?: string;
-				line?: number;
-			}) => void;
+			postMessage: (message: WebviewMessage) => void;
 		};
 	}
 }
@@ -18,13 +12,7 @@ declare global {
 export function useVSCode() {
 	const vscodeRef = useRef(
 		window.vscode || {
-			postMessage: (message: {
-				command: string;
-				text?: string;
-				data?: unknown;
-				filePath?: string;
-				line?: number;
-			}) => {
+			postMessage: (message: WebviewMessage) => {
 				console.log('vscode.postMessage called (mock):', message);
 			}
 		}

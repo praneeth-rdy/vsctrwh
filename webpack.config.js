@@ -48,7 +48,7 @@ const extensionConfig = {
 /** @type WebpackConfig */
 const webviewConfig = {
 	target: 'web',
-	mode: 'none',
+	mode: process.env.NODE_ENV === 'development' ? 'development' : 'production',
 	entry: './src/webview/index.tsx',
 	output: {
 		path: path.resolve(__dirname, 'dist', 'webview'),
@@ -56,7 +56,8 @@ const webviewConfig = {
 		clean: true
 	},
 	resolve: {
-		extensions: ['.ts', '.tsx', '.js', '.jsx']
+		extensions: ['.ts', '.tsx', '.js', '.jsx'],
+		fullySpecified: false
 	},
 	module: {
 		rules: [
@@ -71,6 +72,14 @@ const webviewConfig = {
 						}
 					}
 				}
+			},
+			{
+				test: /\.m?js$/,
+				resolve: {
+					fullySpecified: false
+				},
+				include: /node_modules/,
+				type: 'javascript/auto'
 			},
 			{
 				test: /\.css$/,
@@ -88,9 +97,6 @@ const webviewConfig = {
 			safe: false,
 			systemvars: true,
 			defaults: false
-		}),
-		new webpack.DefinePlugin({
-			'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production')
 		})
 	],
 	devtool: 'source-map',

@@ -1,9 +1,12 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
+// Initialize API client early to set up message listeners
+import './services/api-client';
+import type { WebviewMessage } from './types';
 
 declare function acquireVsCodeApi(): {
-	postMessage: (message: { command: string; text?: string; data?: unknown }) => void;
+	postMessage: (message: WebviewMessage) => void;
 	getState: () => unknown;
 	setState: (state: unknown) => void;
 };
@@ -11,13 +14,7 @@ declare function acquireVsCodeApi(): {
 declare global {
 	interface Window {
 		vscode: {
-			postMessage: (message: {
-				command: string;
-				text?: string;
-				data?: unknown;
-				filePath?: string;
-				line?: number;
-			}) => void;
+			postMessage: (message: WebviewMessage) => void;
 		};
 	}
 }
