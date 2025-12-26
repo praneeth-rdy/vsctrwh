@@ -15,6 +15,7 @@ import {
 	createAgentSessionService,
 	getAgentSessionDetailsService
 } from '../services/copilot-service';
+import { MessageMetadata } from '../types';
 import { parseMessages } from '../utils/parsing-utils/copilot-parsing-utils';
 import { createJsonStreamProcessor } from '../utils/stream-utils';
 
@@ -170,7 +171,8 @@ export const sendChatMessage = async (
 	setters: ChatStateSetters,
 	streamProcessorRef: StreamProcessorRef,
 	processedChunksRef: ProcessedChunksRef,
-	inputRef?: InputRef
+	inputRef?: InputRef,
+	metadata?: MessageMetadata
 ): Promise<string | null> => {
 	if (!message.trim()) return null;
 
@@ -184,7 +186,8 @@ export const sendChatMessage = async (
 		{
 			role: CopilotChatUserRole.User,
 			content: message,
-			createdAt: Date.now()
+			createdAt: Date.now(),
+			metadata
 		}
 	]);
 
@@ -220,9 +223,19 @@ export const sendChatMessage = async (
 			setters.setIsSending(false);
 			return finalSessionId;
 		} else {
+			console.log(metadata);
+			const formattedMessage = metadata
+				? `You are a Tech Coach. Please review the following code snippet
+           & provide a constructive feedback along with alternative implementations and nudges wherever possible
+           to foster critical thinking in the talent.
+           Please do not include any extra info like here's your feedback. Keep it minimal and to the point.
+           Format the text as needed to increase the readability and user focus. Do not add too many linebreaks or spaces.
+           Mention only five most important points.
+           Code snippet: ${metadata.selection?.text}`
+				: message;
 			// For existing chats with stream: true, send the message and handle the stream
 			const response = await sendMessageService({
-				message,
+				message: formattedMessage,
 				stream: true,
 				sessionId: finalSessionId!
 			});

@@ -4,7 +4,7 @@ import { MessageList } from './components/MessageList';
 import { ChatInput } from './components/ChatInput';
 import { useVSCode, useVSCodeMessageListener } from './hooks/useVSCode';
 import { useMessages } from './hooks/useMessages';
-import type { ExtensionMessage } from './types';
+import type { ExtensionMessage, MessageMetadata } from './types';
 import './App.css';
 import { CODER_WORKSPACE_ID, NODE_ENV } from './utils/env';
 import { NodeEnv } from './constraints/enums/core-enums';
@@ -25,8 +25,7 @@ import {
 
 function App() {
 	const vscode = useVSCode();
-	const { messages, isTyping, setIsTyping, addMessage, addIDEEvent, clearMessages, setMessages } =
-		useMessages();
+	const { messages, isTyping, setIsTyping, clearMessages, setMessages } = useMessages();
 
 	const [input, setInput] = useState('');
 	const [streamedChunks, setStreamedChunks] = useState<CopilotChatStreamChunk[]>([]);
@@ -45,7 +44,23 @@ function App() {
 				switch (message.command) {
 					case 'ideEvent':
 						if (message.event && message.event.type === 'codeSelection') {
-							addIDEEvent(message.event);
+							const event = message.event;
+							const lineInfo =
+								event.selection.endLine === event.selection.startLine
+									? `Line ${event.selection.startLine + 1}`
+									: `Lines ${event.selection.startLine + 1}-${event.selection.endLine + 1}`;
+
+							const formattedText = `🔍 Code selection: ${lineInfo}`;
+
+							const metadata = {
+								filePath: event.filePath,
+								fileName: event.fileName,
+								parentFolder: event.parentFolder,
+								language: event.language,
+								selection: event.selection,
+								changeType: 'selection' as const
+							};
+							handleSend(formattedText, metadata);
 						}
 						break;
 					case 'clearChat':
@@ -53,7 +68,7 @@ function App() {
 						break;
 				}
 			},
-			[addIDEEvent, clearMessages]
+			[clearMessages]
 		)
 	);
 
@@ -65,7 +80,7 @@ function App() {
 	};
 
 	const handleSend = useCallback(
-		async (text: string) => {
+		async (text: string, metadata?: MessageMetadata) => {
 			if (!text.trim() || isTyping) return;
 
 			// Send to extension
@@ -81,7 +96,8 @@ function App() {
 				setters,
 				streamProcessorRef,
 				processedChunksRef,
-				inputRef
+				inputRef,
+				metadata
 			);
 		},
 		[isTyping, setIsTyping, vscode, setters, streamProcessorRef, processedChunksRef, inputRef]

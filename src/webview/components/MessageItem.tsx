@@ -1,6 +1,7 @@
 import React from 'react';
 import type { CopilotChatMessage } from '../constraints/types/copilot-types';
 import './MessageItem.css';
+import '../styles/markdown-styles.css';
 import { formatEpochToHumanReadable } from '../utils/date-utils';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -30,39 +31,50 @@ export const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
 		return message.metadata.fileName;
 	};
 
+	const hasSelectionMetadata = message.metadata && message.metadata.changeType === 'selection';
+	const metadata = message.metadata;
+
 	return (
-		<div className={`message ${message.role}`}>
-			<div className="message-bubble">
-				{message.metadata && message.metadata.changeType === 'selection' ? (
+		<div className={`message ${message.role} ${hasSelectionMetadata ? 'has-selection' : ''}`}>
+			<div className={`message-bubble ${hasSelectionMetadata ? 'selection-bubble' : ''}`}>
+				{hasSelectionMetadata && metadata ? (
 					<>
 						{/* File name at the top */}
-						{message.metadata.fileName && message.metadata.filePath && (
+						{metadata.fileName && metadata.filePath && (
 							<div className="file-header">
 								<button
 									className="file-link"
 									onClick={handleFileClick}
-									title={`Open ${getFileDisplayName()}${message.metadata.selection ? ` at line ${message.metadata.selection.startLine + 1}` : ''}`}
+									title={`Open ${getFileDisplayName()}${metadata.selection ? ` at line ${metadata.selection.startLine + 1}` : ''}`}
 								>
-									📄 {getFileDisplayName()}
+									<span className="file-icon">📄</span>
+									<span className="file-name">{getFileDisplayName()}</span>
+									{metadata.selection && (
+										<span className="file-location">
+											Lines {metadata.selection.startLine + 1}
+											{metadata.selection.endLine !== metadata.selection.startLine &&
+												`-${metadata.selection.endLine + 1}`}
+										</span>
+									)}
 								</button>
-								{message.metadata.language && (
-									<span className="file-language">{message.metadata.language}</span>
-								)}
+								{metadata.language && <span className="file-language">{metadata.language}</span>}
 							</div>
 						)}
 
 						{/* Code snippet */}
-						{message.metadata.selection && message.metadata.selection.text && (
+						{metadata.selection && metadata.selection.text && (
 							<pre className="code-snippet">
-								<code>{message.metadata.selection.text}</code>
+								<code>{metadata.selection.text}</code>
 							</pre>
 						)}
 
 						{/* Message text */}
-						<div className="message-text">{message.content}</div>
+						{message.content && <div className="message-text">{message.content}</div>}
 					</>
 				) : (
-					<Markdown remarkPlugins={[remarkGfm]}>{message.content}</Markdown>
+					<div className="custom-markdown">
+						<Markdown remarkPlugins={[remarkGfm]}>{message.content}</Markdown>
+					</div>
 				)}
 			</div>
 			<div className="message-time">{formatEpochToHumanReadable(message.createdAt)}</div>

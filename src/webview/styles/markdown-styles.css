@@ -1,0 +1,359 @@
+.custom-markdown {
+	font-family: var(--vscode-font-family);
+	color: var(--vscode-foreground);
+	font-size: 13px;
+	background: none;
+	word-wrap: break-word;
+	word-break: break-word;
+	overflow-wrap: break-word;
+	line-height: 1.6;
+}
+
+/* Global selector for markdown children */
+.custom-markdown * {
+	color: inherit;
+	font-size: inherit;
+	box-sizing: border-box;
+}
+
+/* Lists */
+.custom-markdown ul,
+.custom-markdown ol {
+	padding-left: 1.5rem;
+	margin-bottom: 0.7rem;
+}
+
+.custom-markdown ul {
+	list-style-type: disc;
+}
+
+.custom-markdown ol {
+	list-style-type: decimal;
+}
+
+.custom-markdown li {
+	margin-bottom: 0.2em;
+}
+
+/* Fix spacing for paragraphs inside list items */
+.custom-markdown li p {
+	margin-top: 0;
+	margin-bottom: 0.5em;
+}
+
+.custom-markdown li p:last-child {
+	margin-bottom: 0;
+}
+
+/* Empty paragraphs for spacing */
+.custom-markdown p:empty {
+	display: block;
+	height: 1em;
+	content: '';
+}
+
+.custom-markdown p:empty::before {
+	content: '\00a0';
+}
+
+/* Headings */
+.custom-markdown h1 {
+	font-size: 2rem;
+	font-weight: bold;
+	margin-bottom: 1.2rem;
+	margin-top: 2rem;
+	color: var(--vscode-editor-foreground);
+	line-height: 1.2;
+}
+
+.custom-markdown h2 {
+	font-size: 1.7rem;
+	font-weight: 600;
+	margin-bottom: 1rem;
+	margin-top: 1.5rem;
+	color: var(--vscode-editor-foreground);
+	line-height: 1.3;
+}
+
+.custom-markdown h3 {
+	font-size: 1.2rem;
+	font-weight: 600;
+	margin-bottom: 0.7rem;
+	margin-top: 1.1rem;
+	color: var(--vscode-editor-foreground);
+	line-height: 1.4;
+}
+
+.custom-markdown h4 {
+	font-size: 1rem;
+	font-weight: 500;
+	margin-bottom: 0.5rem;
+	margin-top: 0.7rem;
+	color: var(--vscode-editor-foreground);
+	line-height: 1.4;
+}
+
+.custom-markdown h5,
+.custom-markdown h6 {
+	font-size: 0.95rem;
+	font-weight: 500;
+	margin-bottom: 0.4rem;
+	margin-top: 0.6rem;
+	color: var(--vscode-editor-foreground);
+	line-height: 1.5;
+}
+
+/* Paragraphs */
+.custom-markdown p {
+	margin-bottom: 1rem;
+	line-height: 1.6;
+	color: var(--vscode-foreground);
+	word-wrap: break-word;
+	word-break: break-word;
+	overflow-wrap: break-word;
+}
+
+/* Horizontal rules and line breaks */
+.custom-markdown hr {
+	margin: 1.8rem 0;
+	border: none;
+	height: 1px;
+	background: var(--vscode-editorGroup-border);
+}
+
+.custom-markdown br {
+	display: block;
+}
+
+/* Links */
+.custom-markdown a {
+	text-decoration: underline;
+	text-underline-offset: 2px;
+	color: var(--vscode-textLink-foreground, #3794ff);
+	transition: color 0.2s;
+	word-break: break-all;
+	overflow-wrap: break-word;
+}
+
+.custom-markdown a:hover {
+	color: var(--vscode-textLink-activeForeground, #1b71c6);
+}
+
+/* Code */
+.custom-markdown code {
+	padding: 2px 6px;
+	border-radius: 4px;
+	font-size: 12px;
+	font-family: var(--vscode-editor-font-family, monospace);
+	background: var(--vscode-editorWidget-background, #23272e);
+	color: var(--vscode-editor-foreground);
+	border: 1px solid var(--vscode-editorGroup-border, #444c56);
+	user-select: text;
+	word-wrap: break-word;
+	word-break: break-word;
+	overflow-wrap: break-word;
+}
+
+.custom-markdown code::selection {
+	background-color: transparent;
+	color: inherit;
+}
+
+.custom-markdown code::-moz-selection {
+	background-color: transparent;
+	color: inherit;
+}
+
+.custom-markdown code::-webkit-selection {
+	background-color: transparent;
+	color: inherit;
+}
+
+.custom-markdown pre,
+.custom-markdown pre code {
+	background: var(--vscode-editorWidget-background, #23272e);
+	color: var(--vscode-editor-foreground);
+	border-radius: 8px;
+}
+
+.custom-markdown pre {
+	padding: 1rem;
+	border-radius: 8px;
+	overflow-x: auto;
+	margin-bottom: 1.2rem;
+	border: 1px solid var(--vscode-editorGroup-border, #444c56);
+	box-shadow: none;
+	outline: none;
+	transition: border-color 0.2s ease;
+	word-wrap: break-word;
+	word-break: break-word;
+	overflow-wrap: break-word;
+}
+
+.custom-markdown pre:hover {
+	border-color: var(--vscode-focusBorder, var(--vscode-editorGroup-border));
+}
+
+.custom-markdown pre code {
+	padding: 0;
+	background: transparent;
+	border: 0;
+	color: var(--vscode-editor-foreground);
+	word-wrap: break-word;
+	word-break: break-word;
+	overflow-wrap: break-word;
+	white-space: pre-wrap;
+}
+
+.custom-markdown pre code::selection {
+	background-color: transparent;
+	color: inherit;
+}
+
+.custom-markdown pre code::-moz-selection {
+	background-color: transparent;
+	color: inherit;
+}
+
+.custom-markdown pre code::-webkit-selection {
+	background-color: transparent;
+	color: inherit;
+}
+
+/* Blockquotes */
+.custom-markdown blockquote {
+	padding-left: 1rem;
+	border-left: 3px solid var(--vscode-textLink-foreground, #3794ff);
+	margin: 1rem 0;
+	font-style: italic;
+	color: var(--vscode-descriptionForeground);
+	background: var(--vscode-editorWidget-background, #23272e);
+	border-radius: 0 6px 6px 0;
+}
+
+.custom-markdown blockquote p {
+	margin-bottom: 0;
+}
+
+/* Tables */
+.custom-markdown > table {
+	width: 100%;
+	border-collapse: collapse;
+	margin-bottom: 1.2rem;
+	border: 1px solid var(--vscode-editorGroup-border, #444c56);
+	border-radius: 6px;
+	max-width: 800px;
+	overflow-x: auto;
+}
+
+.custom-markdown th {
+	padding: 0.7em 1em;
+	text-align: left;
+	font-weight: 600;
+	background: var(--vscode-editorWidget-background, #23272e);
+	color: var(--vscode-editor-foreground);
+	border-bottom: 1px solid var(--vscode-editorGroup-border, #444c56);
+}
+
+.custom-markdown td {
+	padding: 0.7em 1em;
+	color: var(--vscode-foreground);
+	border-bottom: 1px solid var(--vscode-editorGroup-border, #444c56);
+}
+
+.custom-markdown tr:last-child td {
+	border-bottom: none;
+}
+
+.custom-markdown tr:nth-child(even) {
+	background: var(--vscode-editor-background, #1e1e1e);
+}
+
+/* Images */
+.custom-markdown img {
+	max-width: 100%;
+	height: auto;
+	border-radius: 8px;
+	margin-bottom: 1.2em;
+	box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Strong and Emphasis */
+.custom-markdown strong {
+	font-weight: 600;
+	color: var(--vscode-editor-foreground);
+}
+
+.custom-markdown em {
+	font-style: italic;
+	color: var(--vscode-descriptionForeground);
+}
+
+/* Strikethrough */
+.custom-markdown del {
+	text-decoration: line-through;
+	color: var(--vscode-descriptionForeground);
+}
+
+/* Mark/Highlight */
+.custom-markdown mark {
+	padding: 1px 4px;
+	border-radius: 4px;
+	background: var(--vscode-editor-findMatchHighlightBackground, #fffbdd);
+	color: var(--vscode-editor-foreground);
+}
+
+/* Subscript and Superscript */
+.custom-markdown sub,
+.custom-markdown sup {
+	font-size: 11px;
+	color: var(--vscode-descriptionForeground);
+}
+
+.custom-markdown sub {
+	vertical-align: sub;
+}
+
+.custom-markdown sup {
+	vertical-align: super;
+}
+
+/* Definition lists */
+.custom-markdown dl {
+	margin-bottom: 1.2rem;
+}
+
+.custom-markdown dt {
+	font-weight: 600;
+	margin-bottom: 0.2em;
+	color: var(--vscode-editor-foreground);
+}
+
+.custom-markdown dd {
+	margin-left: 1em;
+	margin-bottom: 0.6em;
+	color: var(--vscode-foreground);
+}
+
+/* Task lists */
+.custom-markdown input[type='checkbox'] {
+	margin-right: 0.5em;
+	accent-color: var(--vscode-textLink-foreground, #3794ff);
+}
+
+/* Nested lists */
+.custom-markdown ul ul,
+.custom-markdown ol ol,
+.custom-markdown ul ol,
+.custom-markdown ol ul {
+	margin-top: 0.3em;
+}
+
+/* First/last child spacing */
+.custom-markdown > *:first-child {
+	margin-top: 0 !important;
+}
+
+.custom-markdown > *:last-child {
+	margin-bottom: 0 !important;
+}
