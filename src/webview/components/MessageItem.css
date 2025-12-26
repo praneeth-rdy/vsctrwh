@@ -45,12 +45,15 @@
 }
 
 .message.user .message-bubble {
-	background-color: var(--vscode-button-background);
-	color: var(--vscode-button-foreground);
+	background-color: var(--vscode-input-background, var(--vscode-editor-background));
+	color: var(--vscode-foreground);
+	border: 1px solid var(--vscode-button-background, var(--vscode-input-border));
+	/* border-left-width: 3px; */
 }
 
 .message.user .message-bubble:hover {
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+	border-color: var(--vscode-button-hoverBackground, var(--vscode-button-background));
 }
 
 /* User code selection messages should match assistant style */
