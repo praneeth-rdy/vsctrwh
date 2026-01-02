@@ -223,7 +223,6 @@ export const sendChatMessage = async (
 			setters.setIsSending(false);
 			return finalSessionId;
 		} else {
-			console.log(metadata);
 			const formattedMessage = metadata
 				? `You are a Tech Coach. Please review the following code snippet
            & provide a constructive feedback along with alternative implementations and nudges wherever possible

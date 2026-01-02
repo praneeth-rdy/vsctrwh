@@ -13,7 +13,7 @@ export function useVSCode() {
 	const vscodeRef = useRef(
 		window.vscode || {
 			postMessage: (message: WebviewMessage) => {
-				console.log('vscode.postMessage called (mock):', message);
+				// console.log('vscode.postMessage called (mock):', message);
 			}
 		}
 	);

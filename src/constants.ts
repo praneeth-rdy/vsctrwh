@@ -1,7 +1,8 @@
 export const COMMANDS = {
 	OPEN_CHAT: 'vsctrwh.openChat',
 	CHAT_OPEN: 'workbench.action.chat.open',
-	CHAT_OPEN_IN_EDITOR: 'workbench.action.chat.openInEditor'
+	CHAT_OPEN_IN_EDITOR: 'workbench.action.chat.openInEditor',
+	ANALYSE_WITH_MIO: 'vsctrwh.analyseWithMio'
 } as const;
 
 export const VIEW_IDS = {

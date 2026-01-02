@@ -25,8 +25,6 @@ export const MessageList: React.FC<MessageListProps> = ({
 }) => {
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 
-	console.log(streamedReasoningSteps);
-
 	useEffect(() => {
 		messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
 	}, [messages, isTyping, streamedMessage]);

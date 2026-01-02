@@ -28,12 +28,12 @@ const container = document.getElementById('root');
 if (!container) {
 	console.error('Root container not found!');
 } else {
-	console.log('Initializing React app...');
+	// console.log('Initializing React app...');
 	const root = createRoot(container);
 	root.render(
 		<React.StrictMode>
 			<App />
 		</React.StrictMode>
 	);
-	console.log('React app initialized');
+	// console.log('React app initialized');
 }

@@ -3,15 +3,27 @@ import { getWebviewContent } from '../webview/chatWebview';
 import type { ExtensionMessage, IDEEvent, CodeSelectionEvent } from '../webview/types';
 import { DEBOUNCE_DELAY_MS } from '../constants';
 import { makeApiRequest, makeStreamingApiRequest, type ApiRequest } from '../services/api-service';
+import { AddToChatProvider } from './addToChatProvider';
+import { SelectionDecoration } from './selectionDecoration';
 
 export class ChatViewProvider implements vscode.WebviewViewProvider {
 	private static instance: ChatViewProvider | undefined;
 	private _view?: vscode.WebviewView;
 	private _disposables: vscode.Disposable[] = [];
 	private _selectionDebounceTimer: NodeJS.Timeout | undefined;
+	private _addToChatProvider: AddToChatProvider;
+	private _addToChatProviderDisposable: vscode.Disposable | undefined;
+	private _selectionDecoration: SelectionDecoration;
+	private _pendingSelectionEvent: CodeSelectionEvent | undefined;
 
 	constructor(private readonly _extensionUri: vscode.Uri) {
 		ChatViewProvider.instance = this;
+		this._addToChatProvider = new AddToChatProvider();
+		this._selectionDecoration = new SelectionDecoration();
+		this._addToChatProviderDisposable = vscode.languages.registerCodeLensProvider(
+			{ scheme: 'file' },
+			this._addToChatProvider
+		);
 	}
 
 	public static getInstance(): ChatViewProvider | undefined {
@@ -45,6 +57,10 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 		if (this._selectionDebounceTimer) {
 			clearTimeout(this._selectionDebounceTimer);
 		}
+		this._addToChatProvider.clearSelection();
+		this._selectionDecoration.clearSelection();
+		this._selectionDecoration.dispose();
+		this._addToChatProviderDisposable?.dispose();
 		this._disposables.forEach((disposable) => disposable.dispose());
 		this._disposables = [];
 	}
@@ -189,8 +205,16 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 							}
 						};
 
-						this.sendIDEEvent(selectionEvent);
+						// Store selection and show "Analyse with Mio" button
+						this._pendingSelectionEvent = selectionEvent;
+						this._addToChatProvider.setSelection(document, selection, selectionEvent);
+						this._selectionDecoration.setSelection(document, selection, selectionEvent);
 					}, DEBOUNCE_DELAY_MS);
+				} else {
+					// Clear selection when no selection or empty selection
+					this._addToChatProvider.clearSelection();
+					this._selectionDecoration.clearSelection();
+					this._pendingSelectionEvent = undefined;
 				}
 			}
 		);
@@ -210,8 +234,18 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 		this._view.webview.postMessage(message);
 	}
 
+	public analyseWithMio(selectionEvent: CodeSelectionEvent): void {
+		if (this._pendingSelectionEvent) {
+			// Send the stored selection event to webview
+			this.sendIDEEvent(this._pendingSelectionEvent);
+			this._pendingSelectionEvent = undefined;
+			this._addToChatProvider.clearSelection();
+			this._selectionDecoration.clearSelection();
+		}
+	}
+
 	private handleChatMessage(text: string): void {
-		console.log('Received message:', text);
+		// console.log('Received message:', text);
 	}
 
 	private clearChat(): void {
